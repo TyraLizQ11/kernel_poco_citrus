@@ -100,17 +100,6 @@ struct schedtune {
 	 */
 	bool sched_boost_enabled;
 
-#ifdef CONFIG_SCHED_WALT
-	/*
-	 * Controls whether tasks of this cgroup should be colocated with each
-	 * other and tasks of other cgroups that have the same flag turned on.
-	 */
-	bool colocate;
-
-	/* Controls whether further updates are allowed to the colocate flag */
-	bool colocate_update_disabled;
-#endif /* CONFIG_SCHED_WALT */
-
 	/* Hint to bias scheduling of tasks on that SchedTune CGroup
 	 * towards idle CPUs */
 	int prefer_idle;
@@ -248,25 +237,6 @@ bool task_sched_boost(struct task_struct *p)
 	rcu_read_unlock();
 
 	return sched_boost_enabled;
-}
-
-static u64
-sched_boost_override_read(struct cgroup_subsys_state *css,
-					struct cftype *cft)
-{
-	struct schedtune *st = css_st(css);
-
-	return st->sched_boost_no_override;
-}
-
-static int sched_boost_override_write(struct cgroup_subsys_state *css,
-				struct cftype *cft, u64 override)
-{
-	struct schedtune *st = css_st(css);
-
-	st->sched_boost_no_override = !!override;
-
-	return 0;
 }
 
 static inline bool schedtune_boost_timeout(u64 now, u64 ts)
@@ -740,15 +710,6 @@ boost_write(struct cgroup_subsys_state *css, struct cftype *cft,
 }
 
 #ifdef CONFIG_STUNE_ASSIST
-static int sched_boost_override_write_wrapper(struct cgroup_subsys_state *css,
-					      struct cftype *cft, u64 override)
-{
-	if (task_is_booster(current))
-		return 0;
-
-	return sched_boost_override_write(css, cft, override);
-}
-
 static int boost_write_wrapper(struct cgroup_subsys_state *css,
 			       struct cftype *cft, s64 boost)
 {
@@ -769,18 +730,6 @@ static int prefer_idle_write_wrapper(struct cgroup_subsys_state *css,
 #endif
 
 static struct cftype files[] = {
-	{
-		.name = "sched_boost_no_override",
-		.read_u64 = sched_boost_override_read,
-		.write_u64 = sched_boost_override_write_wrapper,
-	},
-#ifdef CONFIG_SCHED_WALT
-	{
-		.name = "colocate",
-		.read_u64 = sched_colocate_read,
-		.write_u64 = sched_colocate_write,
-	},
-#endif
 	{
 		.name = "boost",
 		.read_s64 = boost_read,
@@ -824,11 +773,11 @@ struct st_data {
 static void write_default_values(struct cgroup_subsys_state *css)
 {
 	static struct st_data st_targets[] = {
-		{ "audio-app",	0, 0, 0, 0 },
-		{ "background",	0, 0, 0, 0 },
-		{ "foreground",	0, 0, 1, 0 },
-		{ "rt",		0, 0, 0, 0 },
-		{ "top-app",	0, 1, 1, 0 },
+		{ "audio-app",	0, 0 },
+		{ "background",	0, 0 },
+		{ "foreground",	0, 1 },
+		{ "rt",		0, 0 },
+		{ "top-app",	1, 1 },
 	};
 	int i;
 
@@ -838,9 +787,8 @@ static void write_default_values(struct cgroup_subsys_state *css)
 		if (!strcmp(css->cgroup->kn->name, tgt.name)) {
 			boost_write(css, NULL, tgt.boost);
 			prefer_idle_write(css, NULL, tgt.prefer_idle);
-			sched_boost_override_write(css, NULL, tgt.no_override);
-			pr_info("stune_assist: setting values for %s: boost=%d prefer_idle=%d no_override=%d\n",
-				tgt.name, tgt.boost, tgt.prefer_idle, tgt.no_override);
+			pr_info("stune_assist: setting values for %s: boost=%d prefer_idle=%d",
+				tgt.name, tgt.boost, tgt.prefer_idle);
 		}
 	}
 }
