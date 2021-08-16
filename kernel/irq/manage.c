@@ -484,6 +484,9 @@ int irq_setup_affinity(struct irq_desc *desc)
 	if (cpumask_empty(&mask))
 		cpumask_copy(&mask, cpu_online_mask);
 
+	if (irqd_has_set(&desc->irq_data, IRQF_PERF_AFFINE))
+		cpumask_copy(&mask, cpu_perf_mask);
+
 	if (node != NUMA_NO_NODE) {
 		const struct cpumask *nodemask = cpumask_of_node(node);
 
@@ -1290,6 +1293,16 @@ static void affine_one_perf_irq(struct irq_desc *desc, unsigned int perf_flag)
 	int *mask_index;
 	int cpu;
 
+	/*
+	* If for some reason all perf cores are offline,
+	* then affine the IRQ to the cores that are left online.
+	*/
+	if (!cpumask_intersects(cpu_perf_mask, cpu_online_mask)) {
+		irq_set_affinity_locked(&desc->irq_data, cpu_online_mask, true);
+		perf_cpu_index = -1;
+		return;
+	}
+	
 	if (perf_flag & IRQF_PERF_AFFINE) {
 		mask = cpu_perf_mask;
 		mask_index = &perf_cpu_index;
