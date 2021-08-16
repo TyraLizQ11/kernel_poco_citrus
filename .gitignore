@@ -144,3 +144,8 @@ kernel/configs/android-*.cfg
 
 # out
 out/
+clang/
+gcc/
+gcc32/
+Image
+*.zip
