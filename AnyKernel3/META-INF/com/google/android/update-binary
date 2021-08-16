@@ -470,9 +470,9 @@ if [ -f version ]; then
 fi;
 
 ui_print "=======================================";
-ui_print "             Chae                    ";
-ui_print "             young.                  ";
-ui_print "             Kernel V4.5             ";
+ui_print "             Chae                     ";
+ui_print "             young.                   ";
+ui_print "             Kernel V5                ";
 ui_print " =====================================";
 ui_print " ";
 ui_print "- Introducing $(file_getprop anykernel.sh kernel.string)";
