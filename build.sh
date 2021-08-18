@@ -32,7 +32,7 @@ function compile() {
 # Zipping
 function zipping() {
     cd AnyKernel3 || exit 1
-    zip -r9 $VERSION-JUICE-$(date +%Y%m%d-%H%M).zip *
+    zip -r9 $VERSION-4.19-JUICE-$(date +%Y%m%d-%H%M).zip *
     cd ..
 }
 
