@@ -470,9 +470,8 @@ if [ -f version ]; then
 fi;
 
 ui_print "=======================================";
-ui_print "             Chae                     ";
-ui_print "             young.                   ";
-ui_print "             Kernel V5                ";
+ui_print "             Mafia                    ";
+ui_print "             Kernel Final             ";
 ui_print " =====================================";
 ui_print " ";
 ui_print "- Introducing $(file_getprop anykernel.sh kernel.string)";
@@ -481,6 +480,8 @@ ui_print "- Maintainer: $(file_getprop anykernel.sh maintainer.string )";
 ui_print "=======================================";
 ui_print "AnyKernel3 by osm0sis @ xda-developers";
 ui_print "=======================================";
+ui_print "   Thanks for patronage! it was fun! ";
+ui_print "=======================================";
 
 setup_env;
 
@@ -488,7 +489,7 @@ do_devicecheck;
 do_versioncheck;
 do_levelcheck;
 
-ui_print "- Installing Chaeyoung Kernel...";
+ui_print "- Installing Mafia Kernel...";
 CORE=$($BB grep -oE 'ak.*core.sh' anykernel.sh);
 [ -f tools/$CORE ] || $BB ln -s $AKHOME/tools/ak*-core.sh $AKHOME/tools/$CORE;
 PATH="$AKHOME/bin:$PATH" home=$AKHOME $BB ash anykernel.sh $2;
@@ -506,4 +507,4 @@ if [ "$(file_getprop anykernel.sh do.cleanup)" == 1 ]; then
 fi;
 
 ui_print " " " " "Done!";
-ui_print " " " " "Chaeyoung Kernel was succesfully installed";
+ui_print " " " " "Mafia Kernel was succesfully installed";
